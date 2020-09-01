@@ -24,6 +24,8 @@ import com.baomidou.mybatisplus.extension.conditions.AbstractChainWrapper;
 /**
  * Update Chain Wrapper
  *
+ * set 字段
+ *
  * @author miemie
  * @since 2018-12-19
  */

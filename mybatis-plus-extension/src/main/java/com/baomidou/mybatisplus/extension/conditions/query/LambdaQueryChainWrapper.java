@@ -26,6 +26,12 @@ import com.baomidou.mybatisplus.extension.conditions.AbstractChainWrapper;
 import java.util.function.Predicate;
 
 /**
+ * 选择哪些列
+ * {
+ *     ChainQuery 接口中包含了直接查询数据库的接口，
+ *     该类的职责是将构建SQL 和 查询数据库的职责组合在一起
+ * }
+ *
  * @author miemie
  * @since 2018-12-19
  */

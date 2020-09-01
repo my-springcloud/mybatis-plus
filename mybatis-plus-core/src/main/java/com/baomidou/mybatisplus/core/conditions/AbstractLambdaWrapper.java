@@ -39,6 +39,10 @@ import static java.util.stream.Collectors.joining;
 public abstract class AbstractLambdaWrapper<T, Children extends AbstractLambdaWrapper<T, Children>>
     extends AbstractWrapper<T, SFunction<T, ?>, Children> {
 
+    /**
+     * 如果 entity 存在，则保存了 entity 的所有列信息，否则 存放的是 SFunction 类的所有列信息
+     * key 为 类的属性名称大写，如属性为 userId，则 key 为 USERID
+     */
     private Map<String, ColumnCache> columnMap = null;
     private boolean initColumnMap = false;
 
@@ -76,7 +80,9 @@ public abstract class AbstractLambdaWrapper<T, Children extends AbstractLambdaWr
      */
     private String getColumn(SerializedLambda lambda, boolean onlyColumn) {
         Class<?> aClass = lambda.getInstantiatedType();
+        // 初始化属性-数据库列缓存
         tryInitCache(aClass);
+        // 通过方法名称获取属性名称，比如 getStudentName会返回 studentName
         String fieldName = PropertyNamer.methodToProperty(lambda.getImplMethodName());
         ColumnCache columnCache = getColumnCache(fieldName, aClass);
         return onlyColumn ? columnCache.getColumn() : columnCache.getColumnSelect();
@@ -84,6 +90,7 @@ public abstract class AbstractLambdaWrapper<T, Children extends AbstractLambdaWr
 
     private void tryInitCache(Class<?> lambdaClass) {
         if (!initColumnMap) {
+            /* 如果设置了 entity，则以entity为准，否则 以 lambdaClass 为准*/
             final Class<T> entityClass = getEntityClass();
             if (entityClass != null) {
                 lambdaClass = entityClass;

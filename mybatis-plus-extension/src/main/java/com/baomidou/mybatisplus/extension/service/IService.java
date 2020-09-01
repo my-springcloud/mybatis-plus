@@ -96,7 +96,7 @@ public interface IService<T> {
      * @param batchSize  每次的数量
      */
     boolean saveOrUpdateBatch(Collection<T> entityList, int batchSize);
-    
+
     /**
      * 根据 ID 删除
      *
@@ -189,7 +189,7 @@ public interface IService<T> {
      * @param entity 实体对象
      */
     boolean saveOrUpdate(T entity);
-    
+
     /**
      * 根据 ID 查询
      *

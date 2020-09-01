@@ -119,7 +119,7 @@ public final class ClassUtils {
             throw ExceptionUtils.mpe("实例化对象时出现错误,请尝试给 %s 添加无参的构造方法", e, clazz.getName());
         }
     }
-    
+
     /**
      * 实例化对象.
      *
@@ -132,7 +132,7 @@ public final class ClassUtils {
     public static <T> T newInstance(String clazzName) {
         return (T) newInstance(toClassConfident(clazzName));
     }
-    
+
 
     /**
      * <p>
@@ -181,7 +181,7 @@ public final class ClassUtils {
         int lastDotIndex = fqClassName.lastIndexOf(PACKAGE_SEPARATOR);
         return (lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "");
     }
-    
+
     /**
      * Return the default ClassLoader to use: typically the thread context
      * ClassLoader, if available; the ClassLoader that loaded the ClassUtils
@@ -201,16 +201,19 @@ public final class ClassUtils {
     public static ClassLoader getDefaultClassLoader() {
         ClassLoader cl = null;
         try {
+            // 线程类加载器
             cl = Thread.currentThread().getContextClassLoader();
         } catch (Throwable ex) {
             // Cannot access thread context ClassLoader - falling back...
         }
         if (cl == null) {
             // No thread context class loader -> use class loader of this class.
+            // 工具类加载器
             cl = ClassUtils.class.getClassLoader();
             if (cl == null) {
                 // getClassLoader() returning null indicates the bootstrap ClassLoader
                 try {
+                    // 系统类加载器
                     cl = ClassLoader.getSystemClassLoader();
                 } catch (Throwable ex) {
                     // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
@@ -219,5 +222,5 @@ public final class ClassUtils {
         }
         return cl;
     }
-    
+
 }

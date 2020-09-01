@@ -47,7 +47,9 @@ public class SerializedLambda implements Serializable {
 
     /**
      * 通过反序列化转换 lambda 表达式，该方法只能序列化 lambda 表达式，不能序列化接口实现或者正常非 lambda 写法的对象
-     *
+     * {
+     *     将 Function先通过 ObjectInputStream 序列化，再反序列化成 自定义的 SerializedLambda
+     * }
      * @param lambda lambda对象
      * @return 返回解析后的 SerializedLambda
      */
@@ -56,6 +58,7 @@ public class SerializedLambda implements Serializable {
             throw ExceptionUtils.mpe("该方法仅能传入 lambda 表达式产生的合成类");
         }
         try (ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(SerializationUtils.serialize(lambda))) {
+            // 自定义对象输出流
             @Override
             protected Class<?> resolveClass(ObjectStreamClass objectStreamClass) throws IOException, ClassNotFoundException {
                 Class<?> clazz;

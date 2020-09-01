@@ -48,7 +48,7 @@ public class SerializationUtils {
 
     /**
      * Serialize the given object to a byte array.
-     *
+     * 对象输出流
      * @param object the object to serialize
      * @return an array of bytes representing the object in a portable fashion
      */

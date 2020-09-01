@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Update 条件封装
  *
+ * 更新语句，指定要修改的列
+ *
  * @author hubin miemie HCL
  * @since 2018-05-30
  */

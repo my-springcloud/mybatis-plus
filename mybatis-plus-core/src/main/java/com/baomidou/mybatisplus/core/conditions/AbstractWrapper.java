@@ -40,6 +40,8 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * 查询条件封装
+ * T: 实体类型
+ * R: 列类型，目前有String 和 SFunction 实现
  *
  * @author hubin miemie HCL
  * @since 2017-05-26

@@ -29,6 +29,8 @@ import java.util.function.Predicate;
 
 /**
  * Entity 对象封装操作类
+ * select 语句指定列
+ * select name,age from student
  *
  * @author hubin miemie HCL
  * @since 2018-05-25

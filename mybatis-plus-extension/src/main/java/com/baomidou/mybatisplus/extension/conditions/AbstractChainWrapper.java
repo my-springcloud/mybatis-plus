@@ -44,6 +44,9 @@ public abstract class AbstractChainWrapper<T, R, Children extends AbstractChainW
     protected final Children typedThis = (Children) this;
     /**
      * 子类所包装的具体 Wrapper 类型
+     *
+     * 代理模式，对 AbstractChainWrapper 进行代理
+     *
      */
     protected Param wrapperChildren;
 

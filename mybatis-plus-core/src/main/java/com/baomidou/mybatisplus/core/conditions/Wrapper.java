@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * 条件构造抽象类
- *
+ * T 表示实体类型
  * @author hubin
  * @since 2018-05-25
  */
@@ -57,6 +57,9 @@ public abstract class Wrapper<T> implements ISqlSegment {
     }
 
     /**
+     *
+     * 模板方法的应用
+     *
      * 获取 MergeSegments
      */
     public abstract MergeSegments getExpression();

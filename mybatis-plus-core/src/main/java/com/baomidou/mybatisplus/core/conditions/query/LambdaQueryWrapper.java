@@ -29,6 +29,10 @@ import java.util.function.Predicate;
 
 /**
  * Lambda 语法使用 Wrapper
+ * {
+ *
+ *     列类型为 SFunction<T, ?>，T 为实体类型
+ * }
  *
  * @author hubin miemie HCL
  * @since 2017-05-26
