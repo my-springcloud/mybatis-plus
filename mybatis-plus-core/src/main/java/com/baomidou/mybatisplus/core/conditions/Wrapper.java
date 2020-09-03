@@ -27,6 +27,13 @@ import java.util.Objects;
 /**
  * 条件构造抽象类
  * T 表示实体类型
+ *
+ * {
+ *     包含三部分职责：
+ *     1. 实体操作，比如：获取实体；判断实体属性是否都为 null
+ *     2. 查询条件判断是否为空操作，比如：判断where条件是否不存在
+ *     3. SQl 语句拼接，比如；获取 Select 语句片段，获取 Set 语句片段，获取最终SQL 等
+ * }
  * @author hubin
  * @since 2018-05-25
  */
@@ -39,6 +46,9 @@ public abstract class Wrapper<T> implements ISqlSegment {
      * @return 泛型 T
      */
     public abstract T getEntity();
+
+    //-----------------------SQL 语句 拼接 start ----------------------------
+
 
     public String getSqlSelect() {
         return null;
@@ -55,6 +65,23 @@ public abstract class Wrapper<T> implements ISqlSegment {
     public String getSqlFirst() {
         return null;
     }
+
+    /**
+     * 获取格式化后的执行sql
+     *
+     * @return sql
+     * @since 3.3.1
+     */
+    public String getTargetSql() {
+        return getSqlSegment().replaceAll("#\\{.+?}", "?");
+    }
+
+    /**
+     * 条件清空
+     *
+     * @since 3.3.1
+     */
+    abstract public void clear();
 
     /**
      *
@@ -91,6 +118,11 @@ public abstract class Wrapper<T> implements ISqlSegment {
         return StringPool.EMPTY;
     }
 
+    //-----------------------SQL 语句 拼接 end ----------------------------
+
+
+    //-----------------------查询条件判断 start ----------------------------
+
     /**
      * 查询条件为空(包含entity)
      */
@@ -113,30 +145,45 @@ public abstract class Wrapper<T> implements ISqlSegment {
     }
 
     /**
-     * 查询条件为空(不包含entity)
+     * 查询条件不为空(不包含entity)
      */
     public boolean nonEmptyOfNormal() {
         return !isEmptyOfNormal();
     }
 
+    //-----------------------查询条件判断 start ----------------------------
+
+
+
+    //-----------------------实体属性判断 start ----------------------------
+
+
     /**
      * 深层实体判断属性
+     * {
+     *     表中的列，对应的 实体属性 是否存在不为空的
+     * }
      *
      * @return true 不为空
      */
     public boolean nonEmptyOfEntity() {
         T entity = getEntity();
+        /* 场景1：实体为 null */
         if (entity == null) {
             return false;
         }
+        /* 场景2：没有表 */
         TableInfo tableInfo = TableInfoHelper.getTableInfo(entity.getClass());
         if (tableInfo == null) {
             return false;
         }
+        /* 场景3：表中的列 在 Entity中存在不为空的 */
         if (tableInfo.getFieldList().stream().anyMatch(e -> fieldStrategyMatch(entity, e))) {
             return true;
         }
-        return StringUtils.isNotBlank(tableInfo.getKeyProperty()) ? Objects.nonNull(ReflectionKit.getFieldValue(entity, tableInfo.getKeyProperty())) : false;
+        /* 场景4：表主键 在 Entity 不为 null */
+        return StringUtils.isNotBlank(tableInfo.getKeyProperty()) ?
+            Objects.nonNull(ReflectionKit.getFieldValue(entity, tableInfo.getKeyProperty())) : false;
     }
 
     /**
@@ -158,7 +205,7 @@ public abstract class Wrapper<T> implements ISqlSegment {
     }
 
     /**
-     * 深层实体判断属性
+     * 深层实体判断属性 是否都为 null
      *
      * @return true 为空
      */
@@ -166,20 +213,6 @@ public abstract class Wrapper<T> implements ISqlSegment {
         return !nonEmptyOfEntity();
     }
 
-    /**
-     * 获取格式化后的执行sql
-     *
-     * @return sql
-     * @since 3.3.1
-     */
-    public String getTargetSql() {
-        return getSqlSegment().replaceAll("#\\{.+?}", "?");
-    }
+    //-----------------------实体属性判断 end ----------------------------
 
-    /**
-     * 条件清空
-     *
-     * @since 3.3.1
-     */
-    abstract public void clear();
 }
