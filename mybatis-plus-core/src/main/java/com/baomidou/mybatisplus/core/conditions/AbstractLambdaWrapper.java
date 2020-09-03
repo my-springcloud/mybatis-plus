@@ -63,6 +63,7 @@ public abstract class AbstractLambdaWrapper<T, Children extends AbstractLambdaWr
     }
 
     protected String columnToString(SFunction<T, ?> column, boolean onlyColumn) {
+        //System.out.println("SFunction " + column.getClass().getName() + " 转换成 column");
         return getColumn(LambdaUtils.resolve(column), onlyColumn);
     }
 
@@ -98,6 +99,7 @@ public abstract class AbstractLambdaWrapper<T, Children extends AbstractLambdaWr
             columnMap = LambdaUtils.getColumnMap(lambdaClass);
             initColumnMap = true;
         }
+        // 如果不存在 TableInfo 构建不了 columnMap
         Assert.notNull(columnMap, "can not find lambda cache for this entity [%s]", lambdaClass.getName());
     }
 

@@ -17,10 +17,12 @@ package com.baomidou.mybatisplus.test;
 
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,9 +51,12 @@ class WrapperTest {
     @Test
     void test() {
         try {
-            Wrapper<User> wrapper = new QueryWrapper<User>().lambda().eq(User::getName, 123)
-                .or(c -> c.eq(User::getRoleId, 1).eq(User::getId, 2))
-                .eq(User::getId, 1);
+            // 构建Wrapper 时，没有表信息时不行的
+            Wrapper<User> wrapper =
+                new QueryWrapper<User>().lambda()
+                    .eq(User::getName, 123)
+                    .or(c -> c.eq(User::getRoleId, 1).eq(User::getId, 2))
+                    .eq(User::getId, 1);
             log(wrapper.getSqlSegment());
         } catch (Exception e) {
             log(e.getMessage());
@@ -66,7 +71,7 @@ class WrapperTest {
              */
             private static final long serialVersionUID = 4719966531503901490L;
 
-            {
+            {   // 使用 字符串表示 表字段不需要走 列缓存
                 eq("xxx", 123);
                 and(i -> i.eq("andx", 65444).le("ande", 66666));
                 ne("xxx", 222);
@@ -211,6 +216,82 @@ class WrapperTest {
         queryWrapper.lambda().eq(User::getName, "sss2");
         logSqlSegment("测试 PluralLambda", queryWrapper, "(username = ? AND username = ?)");
         logParams(queryWrapper);
+    }
+
+    void testCacheLambda() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(User::getName, "sss");
+        queryWrapper.lambda().eq(User::getName, "sss");
+        queryWrapper.getTargetSql();
+    }
+
+    @Test
+    void testCache() {
+        TableInfoHelper.initTableInfo(
+            new MapperBuilderAssistant(new MybatisConfiguration(), ""), User.class
+        );
+        System.out.println("第一次执行----------保存到缓存----------");
+        testCacheLambda();
+        System.out.println("第二次执行--------从缓存中获取------------");
+        testCacheLambda();
+    }
+
+
+    private void lambdaColumn() {
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.eq(User::getName, "sss");
+        queryWrapper.getTargetSql();
+    }
+
+    private void stringColumn() {
+        QueryWrapper<User> queryWrapper = Wrappers.query();
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.eq("name", "sss");
+        queryWrapper.getTargetSql();
+    }
+
+    @Test
+    void testPerformance() {
+        TableInfoHelper.initTableInfo(
+            new MapperBuilderAssistant(new MybatisConfiguration(), ""), User.class
+        );
+        System.out.println("-----Lambda 列 ----------");
+        long lambdaStart = System.currentTimeMillis();
+        for(int i = 0; i<1000000; i++) {
+            lambdaColumn();
+        }
+        long lambdaCost = System.currentTimeMillis()-lambdaStart;
+        System.out.println("--------- 使用 " + lambdaCost + " 毫秒-----------");
+        System.out.println();
+        System.out.println();
+        System.out.println("-----String 列 ----------");
+        long stringStart = System.currentTimeMillis();
+        for(int i = 0; i<1000000; i++) {
+            stringColumn();
+        }
+        long stringCost = System.currentTimeMillis()-stringStart;
+        System.out.println("--------- 使用 " + stringCost + " 毫秒-----------");
+
+        System.out.println("lambdaCost - stringCost = " + (lambdaCost - stringCost));
+        System.out.println("lambdaCost / stringCost = " + ((double)lambdaCost / stringCost));
+
     }
 
     @Test

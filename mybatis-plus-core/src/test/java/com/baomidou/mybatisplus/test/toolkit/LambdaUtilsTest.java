@@ -16,28 +16,48 @@
 package com.baomidou.mybatisplus.test.toolkit;
 
 import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import lombok.Getter;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.function.Function;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 测试 Lambda 解析类
  */
 class LambdaUtilsTest {
 
+
+    @Test
+    void testLambdaSerialized() {
+        System.out.println(getClassName(TestModel::getId));
+        System.out.println(getClassName(TestModel::getId));
+        SerializedLambda b = LambdaUtils.resolve(TestModel::getId);
+        SerializedLambda a = LambdaUtils.resolve(TestModel::getId);
+        assertNotEquals(a,b);
+    }
+
+    <T> String getClassName(SFunction<T,?> function) {
+        return function.getClass().getName();
+    }
     /**
      * 测试解析
      */
     @Test
     void testResolve() {
         SerializedLambda lambda = LambdaUtils.resolve(TestModel::getId);
+        // getId 方法所在的类
         assertEquals(Parent.class.getName(), lambda.getImplClassName());
+        // getId 方法名称
         assertEquals("getId", lambda.getImplMethodName());
+        // 将 方法名称，映射成 字段
         assertEquals("id", PropertyNamer.methodToProperty(lambda.getImplMethodName()));
+        // 实例化方法的类型
         assertEquals(TestModel.class, lambda.getInstantiatedType());
 
         // 测试接口泛型获取

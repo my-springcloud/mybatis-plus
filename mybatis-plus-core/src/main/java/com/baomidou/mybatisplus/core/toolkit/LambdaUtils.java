@@ -60,12 +60,21 @@ public final class LambdaUtils {
      */
     public static <T> SerializedLambda resolve(SFunction<T, ?> func) {
         Class<?> clazz = func.getClass();
+        //System.out.println("解析的SFunction Class类型为：" + clazz.getName());
         String name = clazz.getName();
         return Optional.ofNullable(FUNC_CACHE.get(name)) // 返回一个 WeakReference
-                .map(WeakReference::get) // 从弱引用获取强引用
+                .map(p -> {
+                    SerializedLambda serializedLambda = p.get();
+                    if(null != serializedLambda) {
+                        //System.out.println("已经缓存");
+                    }
+                    return serializedLambda;
+                }) // 从弱引用获取强引用
                 .orElseGet(() -> {
                     // 缓存中不存在，则新增一个函数
+                    //System.out.println("解析的SFunction Class类型为：" + clazz.getName() + " 在缓存中不存在，将被解析成 SerializedLambda 并缓存 ");
                     SerializedLambda lambda = SerializedLambda.resolve(func);
+                    //System.out.println(lambda.toString() + " 解析完成");
                     FUNC_CACHE.put(name, new WeakReference<>(lambda));
                     return lambda;
                 });
@@ -117,7 +126,7 @@ public final class LambdaUtils {
     }
 
     /**
-     * 获取实体对应字段 MAP
+     * 获取实体对应字段 MAP,一定要有 TableInfo
      *
      * @param clazz 实体类
      * @return 缓存 map
